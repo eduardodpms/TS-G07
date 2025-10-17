@@ -2,7 +2,7 @@ from selenium import webdriver
 
 
 class TestSuite():
-    def __init__(self, service_driver, web_driver, address, tests, headless=False):
+    def __init__(self, service_driver, web_driver, logged, address, tests, headless=False, user=None, password=None):
         self.address = address
         self.tests = tests
 
@@ -19,8 +19,14 @@ class TestSuite():
         else:
             raise ValueError("Web driver not supported")
 
+    
         #self.driver.get(address)
+        if not logged:
+            self.login(user, password)
         #driver.quit()
+
+    def login(self, user, password):
+        pass
 
     def run(self):
         pass

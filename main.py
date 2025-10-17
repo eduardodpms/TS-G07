@@ -12,7 +12,6 @@ create_tests_mode = False
 
 
 ############# Variáveis de Login #############
-logged = True # Se já está logado
 user = 'user@user.com'
 password = 'password'
 
@@ -24,4 +23,6 @@ else:
     with open(tests_json, 'r') as f:
         tests = json.load(f)
 
-    suite = TestSuite(service_driver, web_driver, logged, address, tests, headless=False)
+    suite = TestSuite(service_driver, web_driver,
+                      address, tests,
+                      headless=False, user=user, password=password)

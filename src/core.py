@@ -7,26 +7,29 @@ import time
 
 
 class TestSuite():
-    def __init__(self, service_driver, web_driver, address, tests, headless=False, wait=4, user=None, password=None):
+
+    def __init__(self, service_driver, web_driver, address, tests, headless=False, driver_wait=4, test_wait=0.3, user=None, password=None):
+        
         self.address = address
         self.tests = tests
+        self.test_wait = test_wait
         self.user = user
         self.password = password
 
         if hasattr(webdriver, web_driver):
-            self.service = getattr(webdriver, web_driver.lower())
-            self.service = self.service.service.Service(service_driver)
+            service = getattr(webdriver, web_driver.lower())
+            service = service.service.Service(service_driver)
 
-            self.options = getattr(webdriver, web_driver.lower())
-            self.options = self.options.options.Options()
+            options = getattr(webdriver, web_driver.lower())
+            options = options.options.Options()
             if headless:
-                self.options.add_argument("--headless") # executa sem abrir janela
+                options.add_argument("--headless") # executa sem abrir janela
 
-            self.driver = getattr(webdriver, web_driver)(self.options, self.service)
+            self.driver = getattr(webdriver, web_driver)(options, service)
         else:
-            raise ValueError("Web driver not supported")
+            raise ValueError(f"Web Driver not supported {web_driver}.")
 
-        self.wait = WebDriverWait(self.driver, wait)
+        self.wait = WebDriverWait(self.driver, driver_wait)
 
 
     def login(self, user, password):
@@ -75,14 +78,15 @@ class TestSuite():
 
 
     def run(self):
+        
         n, m = 0, len(self.tests)
 
         try:
             self.driver.get(self.address)
             self.login(self.user, self.password)
-            print(f"Login successful. Starting test suite...\n{'-'*26}")
+            print(f">>> Login successful.\n>>> Starting test suite...\n\n{'-'*26}")
         except Exception as e:
-            print(f"Login failed:\n{e}")
+            print(f">>> Login failed:\n{e}")
             self.driver.quit()
             return
 
@@ -90,14 +94,11 @@ class TestSuite():
 
             print(f"> Running Test '{test['id']}'")
 
-            self.wait.until(
-                EC.visibility_of_element_located((By.ID, "header"))
-            )
-
             try:
                 self.post(test['title'], test['body'], test['source'], test['sponsored'])
             except Exception as e:
-                print(f"> Failed to publish post '{test['id']}':\n{e}")
+                print(f">>> Failed to publish in Test '{test['id']}':\n{e}")
+                self.driver.quit()
                 return
             
             try:
@@ -116,7 +117,7 @@ class TestSuite():
             except Exception:
                 print(f"> Failed Test '{test['id']}' ({n}/{m})\n{'-'*26}")
 
-            #time.sleep(5)
+            time.sleep(self.test_wait) # Avoid speed conflicts
 
-        print(f"Test suite finished: {n}/{m} passed.")
+        print(f"\n>>> Test suite finished: {n}/{m} passed.")
         self.driver.close()

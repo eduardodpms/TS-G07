@@ -8,6 +8,7 @@ service_driver = '/usr/bin/geckodriver'
 web_driver = 'Firefox'
 tests_json = 'tests/tests.json'
 address = 'http://localhost:3000/'
+headless = False # Executa os testes sem abrir interface gráfica
 create_tests_mode = False
 
 
@@ -16,7 +17,7 @@ user = 'user@user.com'
 password = 'password'
 
 
-############# Execução da suite de testes #############
+############# Execução do sistema #############
 if create_tests_mode:
     test_maker(tests_json)
 else:
@@ -24,7 +25,7 @@ else:
         tests = json.load(f)
 
     suite = TestSuite(service_driver, web_driver,
-                      address, tests, headless=False,
+                      address, tests, headless=headless,
                       user=user, password=password)
     
     suite.run()

@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
@@ -47,8 +48,6 @@ class TestSuite():
             EC.presence_of_element_located((By.XPATH, "//button[@aria-label='Abrir o menu']"))
         )
 
-        print("Login successful.")
-
 
     def post(self, title, body, source, sponsored):
 
@@ -60,10 +59,15 @@ class TestSuite():
             EC.element_to_be_clickable((By.XPATH, "//div[text()='Publicar']"))
         )
 
+        self.driver.find_element(By.ID, "title").send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+        self.driver.find_element(By.CLASS_NAME, "CodeMirror-code").send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+        self.driver.find_element(By.ID, "source_url").send_keys(Keys.CONTROL + "a", Keys.BACKSPACE)
+
         self.driver.find_element(By.ID, "title").send_keys(title)
         self.driver.find_element(By.CLASS_NAME, "CodeMirror-code").send_keys(body)
         self.driver.find_element(By.ID, "source_url").send_keys(source)
-        if sponsored:
+
+        if (sponsored) ^ bool(self.driver.find_elements(By.XPATH, "//input[@name='isSponsoredContent' and @aria-checked='true']")):
             self.driver.find_element(By.XPATH, "//input[@name='isSponsoredContent']").click()
 
         post.click()
@@ -76,6 +80,7 @@ class TestSuite():
         try:
             self.driver.get(self.address)
             self.login(self.user, self.password)
+            print(f"Login successful. Starting test suite...\n{'-'*26}")
         except Exception as e:
             print(f"Login failed:\n{e}")
             self.driver.quit()
@@ -83,7 +88,7 @@ class TestSuite():
 
         for test in self.tests:
 
-            print(f"Running test with ID = '{test['id']}'")
+            print(f"> Running Test '{test['id']}'")
 
             self.wait.until(
                 EC.visibility_of_element_located((By.ID, "header"))
@@ -92,7 +97,7 @@ class TestSuite():
             try:
                 self.post(test['title'], test['body'], test['source'], test['sponsored'])
             except Exception as e:
-                print(f"Failed to publish post '{test['id']}':\n{e}")
+                print(f"> Failed to publish post '{test['id']}':\n{e}")
                 return
             
             try:
@@ -105,12 +110,13 @@ class TestSuite():
                     self.driver.find_element(By.XPATH, "//span[text()='Sim']").click()
                 else:
                     self.driver.find_element(By.XPATH, f"//*[contains(text(), '{test['expected']}')]")
-                    self.driver.find_element(By.XPATH, "//div[text()='TabNews']").click()
 
                 n += 1
-                print(f"Test '{test['id']}' passed ({n}/{m}).\n")
-            except Exception as e:
-                print(f"Test '{test['id']}' failed ({n}/{m}).\n")
+                print(f"> Passed Test '{test['id']}' ({n}/{m})\n{'-'*26}")
+            except Exception:
+                print(f"> Failed Test '{test['id']}' ({n}/{m})\n{'-'*26}")
 
-            time.sleep(3)
-        #self.driver.quit()
+            #time.sleep(5)
+
+        print(f"Test suite finished: {n}/{m} passed.")
+        self.driver.close()

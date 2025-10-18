@@ -24,5 +24,7 @@ else:
         tests = json.load(f)
 
     suite = TestSuite(service_driver, web_driver,
-                      address, tests,
-                      headless=False, user=user, password=password)
+                      address, tests, headless=False,
+                      user=user, password=password)
+    
+    suite.run()

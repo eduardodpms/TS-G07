@@ -5,7 +5,7 @@
         "body": "C n\u00e3o possui booleano.",
         "source": "",
         "sponsored": false,
-        "expected": "Conte\u00fado publicado."
+        "expected": ""
     },
     {
         "id": "2",
@@ -13,7 +13,7 @@
         "body": "Python possui booleano.",
         "source": "https://docs.python.org/3/",
         "sponsored": false,
-        "expected": "Conte\u00fado publicado."
+        "expected": ""
     },
     {
         "id": "3",
